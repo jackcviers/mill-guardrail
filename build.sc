@@ -1,7 +1,7 @@
 import mill._
 import mill.scalalib._
 
-object millguardrail extends ScalaModule {
+object `mill-guardrail` extends ScalaModule {
 
   def scalaVersion = "2.13.12"
 
