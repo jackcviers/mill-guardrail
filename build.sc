@@ -1,3 +1,5 @@
+import $ivy.`io.github.davidgregory084::mill-tpolecat::0.0.0-68-5779b6`
+import io.github.davidgregory084.TpolecatModule
 import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.1`
 import de.tobiasroeser.mill.integrationtest._
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
@@ -26,26 +28,19 @@ trait Deps {
 
   def mimaPreviousVersions: Seq[String] = Seq()
 
-  private val guardrailVersion = "0.71.0"
+  private val guardrailVersion = "0.75.4"
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
+  val `mill-main-api` = ivy"com.lihaoyi::mill-main-api:${millVersion}"
+  val `mill-scalalib` = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
+  val millTestkit = ivy"com.lihaoyi::mill-main-testkit:${millVersion}"
   val munit = ivy"org.scalameta::munit::0.7.29"
   val `guardrail-core` = ivy"dev.guardrail::guardrail-core:$guardrailVersion"
-  val `guardrail-java-support` =
-    ivy"dev.guardrail::guardrail-java-support:$guardrailVersion"
-  val `guardrail-java-async-http` =
-    ivy"dev.guardrail::guardrail-java-support:$guardrailVersion"
-  val `guardrail-java-dropwizard` =
-    ivy"dev.guardrail::guardrail-java-dropwizard:$guardrailVersion"
-  val `guardrail-java-spring-mvc` =
-    ivy"dev.guardrail::guardrail-java-spring-mvc:$guardrailVersion"
-  val `guardrail-scala-support` =
-    ivy"dev.guardrail::guardrail-scala-support:$guardrailVersion"
-  val `guardrail-scala-akka-http` =
-    ivy"dev.guardrail::guardrail-scala-akka-http:$guardrailVersion"
-  val `guardrail-scala-dropwizard` =
-    ivy"dev.guardrail::guardrail-scala-dropwizard:$guardrailVersion"
-  val `guardrail-scala-http4s` =
-    ivy"dev.guardrail::guardrail-scala-http4s:$guardrailVersion"
+  def `os-lib` = ivy"com.lihaoyi::os-lib:0.8.0"
+  def sourcecode = ivy"com.lihaoyi::sourcecode:0.2.7"
+  val `cats-core` = ivy"org.typelevel::cats-core:2.7.0"
+  def `upickle-core` = ivy"com.lihaoyi::upickle-core:1.4.3"
+  def upickle = ivy"com.lihaoyi::upickle:1.4.3"
+
 }
 
 class Deps_latest(override val millVersion: String) extends Deps {
@@ -58,7 +53,11 @@ object Deps_0_11 extends Deps {
   override def millVersion = "0.11.0" // scala-steward:off
   override def testWithMill = Seq(millVersion)
   override def mimaPreviousVersions = Seq()
-  
+  override def `os-lib` = ivy"com.lihaoyi::os-lib:0.9.1"
+  override def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
+  override def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.1.0"
+  def upickle = ivy"com.lihaoyi::upickle:3.1.0"
+
 }
 object Deps_0_10 extends Deps {
   override def millPlatform = "0.10"
@@ -90,8 +89,9 @@ trait BaseModule
     with ExplicitDepsModule
     with Mima
     with PublishModule
-    with HeaderModule {
-  def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => true)
+    with HeaderModule
+    with TpolecatModule {
+  def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => false)
 
   override def license: HeaderLicense =
     HeaderLicense.Apache2("2024", "Jack Viers")
@@ -105,21 +105,28 @@ trait BaseModule
   override def ivyDeps = T {
     Agg(
       ivy"${scalaOrganization()}:scala-library:${scalaVersion()}",
+      deps.`mill-main-api`,
+      deps.`os-lib`,
+      deps.sourcecode,
+      deps.`cats-core`,
       deps.`guardrail-core`,
-      deps.`guardrail-core`,
-      deps.`guardrail-java-support`,
-      deps.`guardrail-java-async-http`,
-      deps.`guardrail-java-dropwizard`,
-      deps.`guardrail-java-spring-mvc`,
-      deps.`guardrail-scala-support`,
-      deps.`guardrail-scala-akka-http`,
-      deps.`guardrail-scala-dropwizard`,
-      deps.`guardrail-scala-http4s`,
-      deps.`guardrail-scala-http4s`
+      deps.`mill-scalalib`
     ) ++ {
-      if (deps.millPlatform != "0.10") Agg(ivy"com.lihaoyi::mill-main-define:${deps.millVersion}")
-      else if(deps.millPlatform == "0.10") Agg(ivy"com.lihaoyi::mill-main-core:${deps.millVersion}")
-      else Agg.empty
+      if (deps.millPlatform != "0.10")
+        Agg(
+          deps.upickle,
+          deps.`upickle-core`,
+          ivy"com.lihaoyi::mill-moduledefs:0.10.9",
+          ivy"com.lihaoyi::mill-main-define:${deps.millVersion}"
+        )
+      else
+        Agg(
+          ivy"com.lihaoyi::mill-main-core:${deps.millVersion}",
+          ivy"com.lihaoyi::mill-main-moduledefs:${deps.millVersion}",
+          deps.upickle,
+          deps.`upickle-core`,
+          ivy"com.lihaoyi::upickle-implicits:1.4.3"
+        )
     }
   }
 
@@ -154,7 +161,7 @@ trait BaseModule
   }
 
   override def scalacOptions =
-    Seq("-target:jvm-1.8", "-encoding", "UTF-8", "-deprecation")
+    Seq("-release:8", "-encoding", "UTF-8", "-deprecation")
 
   def pomSettings = T {
     PomSettings(
@@ -169,7 +176,7 @@ trait BaseModule
     )
   }
   trait Tests extends ScalaTests with TestModule.Munit {
-    override def ivyDeps = Agg(deps.munit, deps.millMain)
+    override def ivyDeps = Agg(deps.munit, deps.millMain, deps.millTestkit)
   }
 }
 
