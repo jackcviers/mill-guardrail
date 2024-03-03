@@ -28,7 +28,7 @@ trait Deps {
 
   def mimaPreviousVersions: Seq[String] = Seq()
 
-  private val guardrailVersion = "0.75.4"
+  private val guardrailVersion = "1.0.0-M1"
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
   val `mill-main-api` = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val `mill-scalalib` = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
@@ -51,19 +51,14 @@ class Deps_latest(override val millVersion: String) extends Deps {
 object Deps_0_11 extends Deps {
   override def millPlatform = "0.11"
   override def millVersion = "0.11.0" // scala-steward:off
-  override def testWithMill = Seq(millVersion)
+  override def testWithMill =
+    Seq("0.11.1", "0.11.2", "0.11.4", "0.11.5", "0.11.6", "0.11.7", millVersion)
   override def mimaPreviousVersions = Seq()
   override def `os-lib` = ivy"com.lihaoyi::os-lib:0.9.1"
   override def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
   override def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.1.0"
-  def upickle = ivy"com.lihaoyi::upickle:3.1.0"
+  override def upickle = ivy"com.lihaoyi::upickle:3.1.0"
 
-}
-object Deps_0_10 extends Deps {
-  override def millPlatform = "0.10"
-  override def millVersion = "0.10.0" // scala-steward:off
-  // 0.10.4 and 0.10.3 don't run in CI on Windows
-  override def testWithMill = Seq("0.10.12", "0.10.5", millVersion)
 }
 
 lazy val latestDeps: Seq[Deps] = {
@@ -80,7 +75,7 @@ lazy val latestDeps: Seq[Deps] = {
 }
 
 lazy val crossDeps: Seq[Deps] =
-  (Seq(Deps_0_11, Deps_0_10) ++ latestDeps).distinct
+  (Seq(Deps_0_11) ++ latestDeps).distinct
 lazy val millApiVersions = crossDeps.map(x => x.millPlatform -> x)
 lazy val millItestVersions = crossDeps.flatMap(x => x.testWithMill.map(_ -> x))
 
@@ -166,7 +161,7 @@ trait BaseModule
   def pomSettings = T {
     PomSettings(
       description = "Guardrail generation for mill",
-      organization = "com.github.jackcviers",
+      organization = "io.github.jackcviers",
       url = "https://github.com/jackcviers/mill-guardrail",
       licenses = Seq(License.`Apache-2.0`),
       versionControl = VersionControl.github("jackcviers", "mill-guardrail"),
@@ -186,7 +181,7 @@ object millguardrail
 trait MillGuardrailCross extends BaseModule with Cross.Module[String] {
 
   override def millApiVersion: String = crossValue
-  override def artifactName = "com.jackcviers.mill.guardrail"
+  override def artifactName = "io.github.jackcviers.mill.guardrail"
   override def skipIdea: Boolean = deps != crossDeps.head
   override def compileIvyDeps = Agg(deps.millMain)
   object test extends Tests {
@@ -197,7 +192,7 @@ trait MillGuardrailCross extends BaseModule with Cross.Module[String] {
 object itest
     extends Cross[ItestCross](millItestVersions.map(_._1))
     with TaskModule {
-  override def defaultCommandName(): String = "test"
+  override def defaultCommandName(): String = "generatedSources"
   def testCached: T[Seq[TestCase]] = itest(
     millItestVersions.map(_._1).head
   ).testCached
@@ -220,30 +215,43 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
       : Target[Seq[(PathRef, Seq[TestInvocation.Targets])]] = T {
     testCases().map { pathref =>
       pathref.path.last match {
-        case "pet-shop-client-only" =>
-          pathref -> Seq(
-            TestInvocation.Targets(Seq("-d", "verify")),
-            TestInvocation.Targets(
-              Seq("com.jackcviers.mill.guardrail.Guardrail/generate")
-            ),
-            TestInvocation.Targets(
-              Seq("com.jackcviers.mill.guardrail.Guardrail/clientGenerate")
-            )
-          )
         case _ =>
           pathref -> Seq(
-            TestInvocation.Targets(Seq("-d", "verify")),
-            TestInvocation.Targets(
-              Seq("com.jackcviers.mill.guardrail.Guardrail/generate")
-            ),
-            TestInvocation.Targets(
-              Seq("com.jackcviers.mill.guardrail.Guardrail/serverGenerate")
-            ),
-            TestInvocation.Targets(
-              Seq("com.jackcviers.mill.guardrail.Guardrail/clientGenerate")
-            )
+            TestInvocation.Targets(Seq("-d", "pet-shop-full.verify"))
           )
       }
     }
   }
+  override def perTestResources = T.sources {
+    Seq(generatedSharedSrc())
+  }
+
+  def generatedSharedSrc = T {
+    os.write(
+      T.dest / "shared.sc",
+      ""
+    )
+    PathRef(T.dest)
+  }
+}
+
+def findLatestMill(toFile: String = "") = T.command {
+  import coursier._
+  val versions =
+    Versions(
+      cache
+        .FileCache()
+        .withTtl(
+          concurrent.duration.Duration(1, java.util.concurrent.TimeUnit.MINUTES)
+        )
+    )
+      .withModule(mod"com.lihaoyi:mill-main_2.13")
+      .run()
+  println(s"Latest Mill versions: ${versions.latest}")
+  if (toFile.nonEmpty) {
+    val path = os.Path.expandUser(toFile, os.pwd)
+    println(s"Writing file: ${path}")
+    os.write.over(path, versions.latest, createFolders = true)
+  }
+  versions.latest
 }

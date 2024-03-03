@@ -1,12 +1,27 @@
-package com.jackcviers.mill.guardrail
+/* Copyright 2024 Jack Viers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.github.jackcviers.mill.guardrail
 
 import cats._
 import cats.data._
 import cats.implicits._
 import dev.guardrail._
-import dev.{guardrail => dg}
 import dev.guardrail.core.StructuredLogger
 import dev.guardrail.runner._
+import dev.{guardrail => dg}
 import mill.Module
 import mill._
 import mill.api.Result
@@ -14,9 +29,10 @@ import mill.define
 import mill.define._
 import mill.scalalib._
 
+import java.io.File
 import java.nio.file.Path
 
-trait Guardrail extends JavaModule {
+trait Guardrail extends JavaModule with GuardrailPlatform {
 
   /** Where to find your api spec files. Defaults to the module/guardrail
     * directory.
@@ -71,6 +87,7 @@ trait Guardrail extends JavaModule {
     *   https://guardrail.dev/#/java/README
     */
   def guardrailTasks: define.Task[Agg[Guardrail.LanguageAndArgs]] = T.task {
+    import Guardrail.ops._
     val args: Agg[dg.Args] = guardrailSpecFiles().flatMap { specFileRef =>
       for {
         codegenTarget <- List(
@@ -78,12 +95,27 @@ trait Guardrail extends JavaModule {
           CodegenTarget.Server,
           CodegenTarget.Models
         )
-      } yield dg.Args.empty.copy(
+        empty = dg.Args.empty
+        emptyContext = empty.context
+      } yield new dg.Args(
         kind = codegenTarget,
         specPath = Option(specFileRef.path.toString),
         outputPath = Option(T.dest.toString),
-        context =
-          Context.empty.copy(Option(Guardrail.Framework.http4s.toString))
+        packageName =
+          Option(codegenTarget.toPackageName(specFileRef, millSourcePath)),
+        dtoPackage = empty.dtoPackage,
+        printHelp = empty.printHelp,
+        context = new Context(
+          framework = Option(Guardrail.Framework.http4s.toString),
+          customExtraction = emptyContext.customExtraction,
+          tracing = emptyContext.tracing,
+          modules = emptyContext.modules,
+          propertyRequirement = emptyContext.propertyRequirement,
+          tagsBehaviour = emptyContext.tagsBehaviour,
+          authImplementation = emptyContext.authImplementation
+        ),
+        defaults = empty.defaults,
+        imports = empty.imports
       )
     }
     Agg(
@@ -94,10 +126,6 @@ trait Guardrail extends JavaModule {
     )
   }
 
-  /** Runs guardrail generation
-    */
-  object guardrailMillRunner extends GuardrailRunner
-
   /** Generates source code from the guardrailSpecFiles. If
     * shouldGuardrailGenerateClient is true, client files will be generated. If
     * shouldGuardrailGenerateModels is true, DTO models will be generated. If
@@ -107,87 +135,33 @@ trait Guardrail extends JavaModule {
     *   https://guardrail.dev/#/
     */
   def guardrailGenerate: define.Target[Seq[PathRef]] = T.sources {
-    // run the runner, fold over the error, logging the structured log on error and returning the paths in Agg.from on success.
-    guardrailTasks()
-      .filter(_.args.nonEmpty)
-      .iterator
-      .to(List)
-      .flatTraverse { case Guardrail.LanguageAndArgs(language, args) =>
-        guardrailMillRunner.guardrailRunner(
-          Map(
-            language.toString -> NonEmptyList
-              .of[dg.Args](args.head, args.tail: _*)
-          )
-        )
-      }
-      .fold(
-        (error) => {
-          error match {
-            case MissingArg(arg, name) =>
-              Result
-                .Failure[Seq[PathRef]](s"In $arg, ${name.value} is invalid.")
-            case UnknownArguments(args) =>
-              Result
-                .Failure[Seq[PathRef]](s"${args.mkString(", ")} are invalid.")
-            case UnknownFramework(name) =>
-              Result.Failure[Seq[PathRef]](s"${name} is not a valid framework")
-            case MissingDependency(name) =>
-              Result.Failure[Seq[PathRef]](
-                s"${name} is a missing dependency. Add it to your ivyDeps for this project."
-              )
-            case UnparseableArgument(name, message) =>
-              Result.Failure[Seq[PathRef]](
-                s"$name is unparseable: message was: ${message}"
-              )
-            case _: NoArgsSpecified.type =>
-              Result.Failure[Seq[PathRef]](
-                s"Args was empty. Please define them in a guardrailTasks override or remove the override."
-              )
-            case _: NoFramework.type =>
-              Result.Failure[Seq[PathRef]](
-                s"You must define a framework in your arg context."
-              )
-            case _: PrintHelp.type =>
-              Result.Failure[Seq[PathRef]](s"This shouldn't happen.")
-            case RuntimeFailure(message) =>
-              Result.Failure[Seq[PathRef]](message)
-            case UserError(message) =>
-              Result.Failure[Seq[PathRef]](s"A user error occurred: $message")
-            case MissingModule(section, choices) =>
-              Result.Failure[Seq[PathRef]](
-                s"You are missing a module in $section. Please define it in your arg context from among the following choices: ${choices
-                    .mkString(", ")}"
-              )
-            case ModuleConflict(section) =>
-              Result.Failure[Seq[PathRef]](
-                s"You have a conflict in the modules in $section. Please only define modules that work together according to the Guardrail docs at https://guardrail.dev"
-              )
-            case _ =>
-              Result.Failure[Seq[PathRef]](
-                s"Internal Guardrail failure. Check your spec files and guardrailTaskDefinition overrides carefully. See the Guardrail docs at https://guardrail.dev."
-              )
-          }
-        },
-        value => Result.Success(value.map { p => PathRef(os.Path(p)) })
-      )
+    val (worker, runner, classLoader) = guardrailWorker()
+    val currentClassLoader = Thread.currentThread().getContextClassLoader()
+    Thread.currentThread().setContextClassLoader(classLoader)
+    val result = worker.guardrailGenerate(guardrailTasks(), runner)
+    Thread.currentThread().setContextClassLoader(currentClassLoader)
+    result
   }
 
   /** Add the necessary support modules for any generated classes. NOTE - you
     * can override these if you wish.
     */
-  override def ivyDeps = T.task {
-    super.ivyDeps() ++ Agg(
-      ivy"dev.guardrail::guardrail-java-dropwizard:0.71.0",
-      ivy"dev.guardrail::guardrail-java-spring-mvc:0.71.0",
-      ivy"dev.guardrail::guardrail-java-support:0.71.0",
-      ivy"dev.guardrail::guardrail-scala-akka-http:0.71.0",
-      ivy"dev.guardrail::guardrail-scala-dropwizard:0.71.0",
-      ivy"dev.guardrail::guardrail-scala-http4s:0.71.0",
-      ivy"dev.guardrail::guardrail-scala-support:0.71.0"
+  def guardrailIvyDeps = T.task {
+    Agg(
+      ivy"dev.guardrail::guardrail-java-dropwizard:1.0.0-M1",
+      ivy"dev.guardrail::guardrail-java-spring-mvc:1.0.0-M1",
+      ivy"dev.guardrail::guardrail-java-support:1.0.0-M1",
+      ivy"dev.guardrail::guardrail-scala-akka-http:1.0.0-M1",
+      ivy"dev.guardrail::guardrail-scala-dropwizard:1.0.0-M1",
+      ivy"dev.guardrail::guardrail-scala-http4s:1.0.0-M1",
+      ivy"dev.guardrail::guardrail-scala-support:1.0.0-M1"
     )
   }
 
-  // add to generated sources the guardrailGenerate
+  override def generatedSources: T[Seq[PathRef]] = T {
+    super.generatedSources() ++ guardrailGenerate()
+  }
+
 }
 
 object Guardrail {
@@ -226,5 +200,31 @@ object Guardrail {
       language: Guardrail.Language,
       args: Seq[dg.Args]
   )
+  object ops {
+    implicit class CodegenTargetOps(val underlying: CodegenTarget)
+        extends AnyVal {
+      private def pathRefToPackageName(
+          pathRef: PathRef,
+          millSourcePath: os.Path
+      ): IndexedSeq[String] = pathRef.path
+        .relativeTo(millSourcePath)
+        .segments
+        .dropRight(1)
+
+      /** Converts the codegen type to a list of package names.
+        */
+      def toPackageName(
+          pathRef: PathRef,
+          millSourcePath: os.Path
+      ): List[String] = (underlying match {
+        case CodegenTarget.Client =>
+          pathRefToPackageName(pathRef, millSourcePath).appended("client")
+        case CodegenTarget.Server =>
+          pathRefToPackageName(pathRef, millSourcePath).appended("server")
+        case CodegenTarget.Models =>
+          pathRefToPackageName(pathRef, millSourcePath).appended("models")
+      }).iterator.to(List)
+    }
+  }
 
 }
