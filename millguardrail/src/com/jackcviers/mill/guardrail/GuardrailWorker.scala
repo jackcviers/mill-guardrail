@@ -90,6 +90,12 @@ final class GuardrailWorkerImpl extends GuardrailWorker {
               Result.Failure[Seq[PathRef]](
                 s"You have a conflict in the modules in $section. Please only define modules that work together according to the Guardrail docs at https://guardrail.dev"
               )
+            case UnspecifiedModules(choices) => Result.Failure[Seq[PathRef]](
+                s"You are missing some modules in the context. Please choose from the following choices:$choices"
+            )
+            case UnusedModules(found) => Result.Failure[Seq[PathRef]](
+                s"You have a unused in the modules in your context: $found. Please remove them."
+              )
             case _ =>
               Result.Failure[Seq[PathRef]](
                 s"Internal Guardrail failure. Check your spec files and guardrailTaskDefinition overrides carefully. See the Guardrail docs at https://guardrail.dev."

@@ -96,27 +96,16 @@ trait Guardrail extends JavaModule with GuardrailPlatform {
           CodegenTarget.Models
         )
         empty = dg.Args.empty
-        emptyContext = empty.context
-      } yield new dg.Args(
-        kind = codegenTarget,
-        specPath = Option(specFileRef.path.toString),
-        outputPath = Option(T.dest.toString),
-        packageName =
-          Option(codegenTarget.toPackageName(specFileRef, millSourcePath)),
-        dtoPackage = empty.dtoPackage,
-        printHelp = empty.printHelp,
-        context = new Context(
-          framework = Option(Guardrail.Framework.http4s.toString),
-          customExtraction = emptyContext.customExtraction,
-          tracing = emptyContext.tracing,
-          modules = emptyContext.modules,
-          propertyRequirement = emptyContext.propertyRequirement,
-          tagsBehaviour = emptyContext.tagsBehaviour,
-          authImplementation = emptyContext.authImplementation
-        ),
-        defaults = empty.defaults,
-        imports = empty.imports
-      )
+      } yield empty
+        .withKind(codegenTarget)
+        .withSpecPath(Option(specFileRef.path.toString))
+        .withOutputPath(Option(T.dest.toString))
+        .withPackageName(
+          Option(codegenTarget.toPackageName(specFileRef, millSourcePath))
+        )
+        .modifyContext(c =>
+          c.withFramework(Option(Guardrail.Framework.http4s.toString))
+        )
     }
     Agg(
       Guardrail.LanguageAndArgs(
@@ -148,13 +137,13 @@ trait Guardrail extends JavaModule with GuardrailPlatform {
     */
   def guardrailIvyDeps = T.task {
     Agg(
-      ivy"dev.guardrail::guardrail-java-dropwizard:1.0.0-M1",
-      ivy"dev.guardrail::guardrail-java-spring-mvc:1.0.0-M1",
-      ivy"dev.guardrail::guardrail-java-support:1.0.0-M1",
-      ivy"dev.guardrail::guardrail-scala-akka-http:1.0.0-M1",
-      ivy"dev.guardrail::guardrail-scala-dropwizard:1.0.0-M1",
-      ivy"dev.guardrail::guardrail-scala-http4s:1.0.0-M1",
-      ivy"dev.guardrail::guardrail-scala-support:1.0.0-M1"
+      ivy"dev.guardrail:guardrail-java-dropwizard_2.13:1.0.0-M1",
+      ivy"dev.guardrail:guardrail-java-spring-mvc_2.13:1.0.0-M1",
+      ivy"dev.guardrail:guardrail-java-support_2.13:1.0.0-M1",
+      ivy"dev.guardrail:guardrail-scala-akka-http_2.13:1.0.0-M1",
+      ivy"dev.guardrail:guardrail-scala-dropwizard_2.13:1.0.0-M1",
+      ivy"dev.guardrail:guardrail-scala-http4s_2.13:1.0.0-M1",
+      ivy"dev.guardrail:guardrail-scala-support_2.13:1.0.0-M1"
     )
   }
 
@@ -179,11 +168,15 @@ object Guardrail {
     private case object `Pekko-Http` extends Framework {
       override def toString = "pekko-http"
     }
+    private case object `Spring-Mvc` extends Framework{
+      override def toString = "spring-mvc"
+    }
 
     def http4s: Framework = Http4s
     def `akka-http`: Framework = `Akka-Http`
-    def dropwizard: Framework = `Dropwizard`
+    def dropwizard: Framework = Dropwizard
     def `pekko-http`: Framework = `Pekko-Http`
+    def `spring-mvc`: Framework = `Spring-Mvc`
   }
   sealed trait Language
   object Language {

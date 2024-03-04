@@ -1,11 +1,26 @@
-import $ivy.`io.github.davidgregory084::mill-tpolecat::0.0.0-68-5779b6`
-import io.github.davidgregory084.TpolecatModule
+/* Copyright 2024 Jack Viers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// import $ivy.`io.github.davidgregory084::mill-tpolecat::0.0.0-68-5779b6`
+// import io.github.davidgregory084.TpolecatModule
 import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.1`
 import de.tobiasroeser.mill.integrationtest._
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
 import de.tobiasroeser.mill.vcs.version._
-import $ivy.`io.github.kierendavies::mill-explicit-deps::0.2.0-57-207608-DIRTYb69d7b2d-SNAPSHOT`
-import io.github.kierendavies.mill.explicitdeps.ExplicitDepsModule
+// import $ivy.`io.github.kierendavies::mill-explicit-deps::0.2.0-57-207608-DIRTYb69d7b2d-SNAPSHOT`
+// import io.github.kierendavies.mill.explicitdeps.ExplicitDepsModule
 import $ivy.`com.github.lolgab::mill-mima::0.1.0`
 import com.github.lolgab.mill.mima._
 import $ivy.`com.lewisjkl::header-mill-plugin::0.0.3`
@@ -29,18 +44,21 @@ trait Deps {
   def mimaPreviousVersions: Seq[String] = Seq()
 
   private val guardrailVersion = "1.0.0-M1"
-  val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
+
+  def `mill-moduledefs` = ivy"com.lihaoyi::mill-moduledefs:0.10.9"
+  def `os-lib` = ivy"com.lihaoyi::os-lib:0.9.1"
+  def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.1.0"
+  def `upickle-implicits` = ivy"com.lihaoyi::upickle-implicits:3.1.0"
+  def mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
+  def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
+  def upickle = ivy"com.lihaoyi::upickle:3.1.0"
+  val `cats-core` = ivy"org.typelevel::cats-core:2.7.0"
+  val `guardrail-core` = ivy"dev.guardrail::guardrail-core:$guardrailVersion"
   val `mill-main-api` = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val `mill-scalalib` = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
   val millTestkit = ivy"com.lihaoyi::mill-main-testkit:${millVersion}"
   val munit = ivy"org.scalameta::munit::0.7.29"
-  val `guardrail-core` = ivy"dev.guardrail::guardrail-core:$guardrailVersion"
-  def `os-lib` = ivy"com.lihaoyi::os-lib:0.8.0"
-  def sourcecode = ivy"com.lihaoyi::sourcecode:0.2.7"
-  val `cats-core` = ivy"org.typelevel::cats-core:2.7.0"
-  def `upickle-core` = ivy"com.lihaoyi::upickle-core:1.4.3"
-  def upickle = ivy"com.lihaoyi::upickle:1.4.3"
-
+  val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
 }
 
 class Deps_latest(override val millVersion: String) extends Deps {
@@ -54,11 +72,6 @@ object Deps_0_11 extends Deps {
   override def testWithMill =
     Seq("0.11.1", "0.11.2", "0.11.4", "0.11.5", "0.11.6", "0.11.7", millVersion)
   override def mimaPreviousVersions = Seq()
-  override def `os-lib` = ivy"com.lihaoyi::os-lib:0.9.1"
-  override def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
-  override def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.1.0"
-  override def upickle = ivy"com.lihaoyi::upickle:3.1.0"
-
 }
 
 lazy val latestDeps: Seq[Deps] = {
@@ -81,12 +94,13 @@ lazy val millItestVersions = crossDeps.flatMap(x => x.testWithMill.map(_ -> x))
 
 trait BaseModule
     extends ScalaModule
-    with ExplicitDepsModule
+    // with ExplicitDepsModule
     with Mima
     with PublishModule
     with HeaderModule
-    with TpolecatModule {
-  def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => false)
+    // with TpolecatModule
+{
+  // def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => false)
 
   override def license: HeaderLicense =
     HeaderLicense.Apache2("2024", "Jack Viers")
@@ -105,27 +119,17 @@ trait BaseModule
       deps.sourcecode,
       deps.`cats-core`,
       deps.`guardrail-core`,
-      deps.`mill-scalalib`
-    ) ++ {
-      if (deps.millPlatform != "0.10")
-        Agg(
-          deps.upickle,
-          deps.`upickle-core`,
-          ivy"com.lihaoyi::mill-moduledefs:0.10.9",
-          ivy"com.lihaoyi::mill-main-define:${deps.millVersion}"
-        )
-      else
-        Agg(
-          ivy"com.lihaoyi::mill-main-core:${deps.millVersion}",
-          ivy"com.lihaoyi::mill-main-moduledefs:${deps.millVersion}",
-          deps.upickle,
-          deps.`upickle-core`,
-          ivy"com.lihaoyi::upickle-implicits:1.4.3"
-        )
-    }
+      deps.`mill-scalalib`,
+      deps.upickle,
+      deps.`upickle-core`,
+      deps.`upickle-implicits`,
+      deps.mainargs,
+      deps.`mill-moduledefs`,
+      ivy"com.lihaoyi::mill-main-define:${deps.millVersion}"
+    )
   }
 
-  def publishVersion = VcsVersion.vcsState().format()
+  def publishVersion = VcsVersion.vcsState().format(untaggedSuffix = "-SNAPSHOT")
   override def versionScheme: T[Option[VersionScheme]] = T(
     Option(VersionScheme.EarlySemVer)
   )
@@ -181,7 +185,7 @@ object millguardrail
 trait MillGuardrailCross extends BaseModule with Cross.Module[String] {
 
   override def millApiVersion: String = crossValue
-  override def artifactName = "io.github.jackcviers.mill.guardrail"
+  override def artifactName = "mill-guardrail"
   override def skipIdea: Boolean = deps != crossDeps.head
   override def compileIvyDeps = Agg(deps.millMain)
   object test extends Tests {
@@ -215,9 +219,36 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
       : Target[Seq[(PathRef, Seq[TestInvocation.Targets])]] = T {
     testCases().map { pathref =>
       pathref.path.last match {
+        case "pet-shop-scala-akka-http-jackson" =>
+          pathref -> Seq(
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-scala-akka-http-jackson.verify"),
+              noServer = false
+            )
+          )
+        case "pet-shop-no-server" =>
+          pathref -> Seq(
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-no-server.verify"),
+              noServer = false
+            )
+          )
+        case "pet-shop-scala-akka-http" =>
+          pathref -> Seq(
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-scala-akka-http.verify"),
+              noServer = false
+            )
+          )
+        case "pet-shop-java-spring-mvc" =>
+          pathref -> Seq(
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-java-spring-mvc.verify")
+            )
+          )
         case _ =>
           pathref -> Seq(
-            TestInvocation.Targets(Seq("-d", "pet-shop-full.verify"))
+            // TestInvocation.Targets(Seq("-d", "-j", "0", "pet-shop-full.verify"), noServer=false)
           )
       }
     }

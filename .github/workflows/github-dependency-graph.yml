@@ -16,6 +16,6 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
     - uses: ckipp01/mill-dependency-submission@v1
-		  with:
-			  plugin-version: "0.2.6"
-				token: ${{secrets.DEPENDABOT_TOKEN}}
+      with:
+        plugin-version: "0.2.6"
+        token: ${{secrets.DEPENDABOT_TOKEN}}

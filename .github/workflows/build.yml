@@ -36,20 +36,20 @@ jobs:
           java-version: ${{ matrix.java-version }}
           distribution: temurin
 
-      - run: ./millw -i findLatestMill --toFile MILL_DEV_VERSION
+      - run: ./mill -i findLatestMill --toFile MILL_DEV_VERSION
         if: matrix.os != 'windows-latest' && github.event_name == 'workflow_dispatch'
-      - run: ./millw.bat -i findLatestMill --toFile MILL_DEV_VERSION
+      - run: ./mill.bat -i findLatestMill --toFile MILL_DEV_VERSION
         if: matrix.os == 'windows-latest' && github.event_name == 'workflow_dispatch'
 
-      - run: ./millw -i __.publishLocal testRepo
+      - run: ./mill -i __.publishLocal testRepo
         if: matrix.os != 'windows-latest'
-      - run: .\millw.bat -i __.publishLocal testRepo
+      - run: .\mill.bat -i __.publishLocal testRepo
         if: matrix.os == 'windows-latest'
         shell: cmd
 
-      - run: ./millw -i -k __.testCached
+      - run: ./mill -i -k __.testCached
         if: matrix.os != 'windows-latest'
-      - run: ./millw.bat -i -k __.testCached
+      - run: ./mill.bat -i -k __.testCached
         if: matrix.os == 'windows-latest'
         shell: cmd
 
@@ -67,7 +67,8 @@ jobs:
           java-version: 8
           distribution: temurin
 
-      - run: ./millw -i __.mimaReportBinaryIssues
+      - run: ./mill -i __.mimaReportBinaryIssues
+      - run: ./mill -i __.headerCheck
 
   publish:
     needs: [build, checks]
@@ -87,14 +88,14 @@ jobs:
           java-version: 8
           distribution: temurin
 
-      - run: ./millw -i findLatestMill --toFile MILL_DEV_VERSION
+      - run: ./mill -i findLatestMill --toFile MILL_DEV_VERSION
         if: matrix.os != 'windows-latest' && github.event_name == 'workflow_dispatch'
-      - run: ./millw.bat -i findLatestMill --toFile MILL_DEV_VERSION
+      - run: ./mill.bat -i findLatestMill --toFile MILL_DEV_VERSION
         if: matrix.os == 'windows-latest' && github.event_name == 'workflow_dispatch'
 
-      - run: ./millw -i __.publishLocal $(pwd)/testRepo
+      - run: ./mill -i __.publishLocal $(pwd)/testRepo
         if: matrix.os != 'windows-latest'
-      - run: .\millw.bat -i __.publishLocal %GITHUB_WORKSPACE%/testRepo
+      - run: .\mill.bat -i __.publishLocal %GITHUB_WORKSPACE%/testRepo
         if: matrix.os == 'windows-latest'
         shell: cmd
 
@@ -105,9 +106,9 @@ jobs:
           gpg --list-secret-keys --keyid-format LONG
 
       - name: Publish to Maven Central
-        run: ./millw -i mill.scalalib.PublishModule/publishAll --sonatypeCreds "${{ secrets.SONATYPE_CREDS }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --publishArtifacts __.publishArtifacts --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
+        run: ./mill -i mill.scalalib.PublishModule/publishAll --sonatypeCreds "${{secrets.SONATYPE_USER}}:${{ secrets.SONATYPE_PASSWORD }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --publishArtifacts __.publishArtifacts --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
         if: github.event_name != 'workflow_dispatch'
 
       - name: Publish for Mill development version to Maven Central
-        run: ./millw -i mill.scalalib.PublishModule/publishAll --sonatypeCreds "${{ secrets.SONATYPE_CREDS }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --publishArtifacts __[$(<MILL_DEV_VERSION)].publishArtifacts --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
+        run: ./mill -i mill.scalalib.PublishModule/publishAll --sonatypeCreds "${{secrets.SONATYPE_USER}}:${{ secrets.SONATYPE_PASSWORD }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --publishArtifacts __[$(<MILL_DEV_VERSION)].publishArtifacts --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
         if: github.event_name == 'workflow_dispatch'

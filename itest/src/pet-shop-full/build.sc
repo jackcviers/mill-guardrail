@@ -1,3 +1,18 @@
+/* Copyright 2024 Jack Viers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 import $file.plugins
 import $file.shared
 
@@ -27,7 +42,6 @@ object `pet-shop-full` extends ScalaModule with Guardrail {
 
   def verify(): Command[Unit] = T.command {
     compile()
-    println(allSources())
     val expectedSources = Set(
       s"pet-shop-full/out/pet-shop-full/guardrailGenerate.dest/guardrail/client/definitions/Order.scala",
       s"pet-shop-full/out/pet-shop-full/guardrailGenerate.dest/guardrail/models/definitions/User.scala",
@@ -69,7 +83,7 @@ object `pet-shop-full` extends ScalaModule with Guardrail {
     )
     assert(
       generatedSources().exists(f =>
-        expectedSources.exists(e => f.toString.contains(e.toString))
+        expectedSources.exists(e => f.toString.replaceAllLiterally("\\", "/").contains(e.toString))
       )
     )
   }
