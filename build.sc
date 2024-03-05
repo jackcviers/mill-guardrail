@@ -248,7 +248,7 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
           )
         case _ =>
           pathref -> Seq(
-            // TestInvocation.Targets(Seq("-d", "-j", "0", "pet-shop-full.verify"), noServer=false)
+            TestInvocation.Targets(Seq("-d", "-j", "0", "pet-shop-full.verify"), noServer=false)
           )
       }
     }
