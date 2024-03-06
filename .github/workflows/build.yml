@@ -108,7 +108,3 @@ jobs:
       - name: Publish to Maven Central
         run: ./mill -i mill.scalalib.PublishModule/publishAll --sonatypeCreds "${{secrets.SONATYPE_USER}}:${{ secrets.SONATYPE_PASSWORD }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --publishArtifacts __.publishArtifacts --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
         if: github.event_name != 'workflow_dispatch'
-
-      - name: Publish for Mill development version to Maven Central
-        run: ./mill -i mill.scalalib.PublishModule/publishAll --sonatypeCreds "${{secrets.SONATYPE_USER}}:${{ secrets.SONATYPE_PASSWORD }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --publishArtifacts __[$(<MILL_DEV_VERSION)].publishArtifacts --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
-        if: github.event_name == 'workflow_dispatch'
