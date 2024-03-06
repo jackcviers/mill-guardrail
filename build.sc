@@ -165,7 +165,7 @@ trait BaseModule
   def pomSettings = T {
     PomSettings(
       description = "Guardrail generation for mill",
-      organization = "io.github.jackcviers",
+      organization = "com.jackcviers",
       url = "https://github.com/jackcviers/mill-guardrail",
       licenses = Seq(License.`Apache-2.0`),
       versionControl = VersionControl.github("jackcviers", "mill-guardrail"),

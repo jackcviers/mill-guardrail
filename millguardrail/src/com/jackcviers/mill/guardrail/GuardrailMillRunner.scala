@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package io.github.jackcviers.mill.guardrail
+package com.jackcviers.mill.guardrail
 
 import dev.guardrail.runner.GuardrailRunner
 

@@ -16,7 +16,7 @@ n *
 import $file.plugins
 import $file.shared
 
-import io.github.jackcviers.mill.guardrail._
+import com.jackcviers.mill.guardrail._
 import mill._
 import mill.scalalib._
 import mill.api.PathRef
