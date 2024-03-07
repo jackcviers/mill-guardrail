@@ -104,7 +104,6 @@ jobs:
           gpg --version
           cat <(echo "${{ secrets.GPG_SECRET_KEY }}") | base64 --decode | gpg --batch --import
           gpg --list-secret-keys --keyid-format LONG
-
       - name: Publish to Maven Central
-        run: ./mill -i mill.scalalib.PublishModule/publishAll --publishArtifacts --sonatypeCreds ${{secrets.SONATYPE_USER}}:${{ secrets.SONATYPE_PASSWORD }} --gpgArgs --passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},-u 0x0x6ACFFB7C000D6AA9,--batch,--yes,-a,-b,--pinentry-mode,loopback --readTimeout 600000 --awaitTimeout 600000 --release true --signed true
+        run: ./mill -i mill.scalalib.PublishModule/publishAll __.publishArtifacts --sonatypeCreds "${{secrets.SONATYPE_USER}}:${{ secrets.SONATYPE_PASSWORD }}" --gpgArgs "--passphrase=${{ secrets.GPG_SECRET_KEY_PASS}},--batch,--yes,-a,-b,--pinentry-mode,loopback" --readTimeout 600000 --awaitTimeout 600000 --release true --signed true --sonatypeUri https://s01.oss.sonatype.org/service/local --sonatypeSnapshotUri https://s01.oss.sonatype.org/content/repositories/snapshots
         if: github.event_name != 'workflow_dispatch'
