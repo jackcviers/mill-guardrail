@@ -99,7 +99,7 @@ trait BaseModule
     with PublishModule
     with HeaderModule
     // with TpolecatModule
-{
+    {
   // def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => false)
 
   override def license: HeaderLicense =
@@ -129,7 +129,8 @@ trait BaseModule
     )
   }
 
-  def publishVersion = VcsVersion.vcsState().format(untaggedSuffix = "-SNAPSHOT")
+  def publishVersion =
+    VcsVersion.vcsState().format(untaggedSuffix = "-SNAPSHOT")
   override def versionScheme: T[Option[VersionScheme]] = T(
     Option(VersionScheme.EarlySemVer)
   )
@@ -248,7 +249,10 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
           )
         case _ =>
           pathref -> Seq(
-            TestInvocation.Targets(Seq("-d", "-j", "0", "pet-shop-full.verify"), noServer=false)
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-full.verify"),
+              noServer = false
+            )
           )
       }
     }

@@ -118,7 +118,9 @@ object `pet-shop-scala-akka-http-jackson` extends ScalaModule with Guardrail {
     )
     assert(
       generatedSources().exists(f =>
-        expectedSources.exists(e => f.toString.replaceAllLiterally("\\", "/").contains(e.toString))
+        expectedSources.exists(e =>
+          f.toString.replaceAllLiterally("\\", "/").contains(e.toString)
+        )
       )
     )
   }
