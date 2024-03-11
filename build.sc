@@ -49,7 +49,7 @@ trait Deps {
   def `os-lib` = ivy"com.lihaoyi::os-lib:0.9.1"
   def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.1.0"
   def `upickle-implicits` = ivy"com.lihaoyi::upickle-implicits:3.1.0"
-  def mainargs = ivy"com.lihaoyi::mainargs:0.5.0"
+  def mainargs = ivy"com.lihaoyi::mainargs:0.5.4"
   def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
   def upickle = ivy"com.lihaoyi::upickle:3.1.0"
   val `cats-core` = ivy"org.typelevel::cats-core:2.7.0"
@@ -99,7 +99,7 @@ trait BaseModule
     with PublishModule
     with HeaderModule
     // with TpolecatModule
-{
+    {
   // def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => false)
 
   override def license: HeaderLicense =
@@ -129,7 +129,8 @@ trait BaseModule
     )
   }
 
-  def publishVersion = VcsVersion.vcsState().format(untaggedSuffix = "-SNAPSHOT")
+  def publishVersion =
+    VcsVersion.vcsState().format(untaggedSuffix = "-SNAPSHOT")
   override def versionScheme: T[Option[VersionScheme]] = T(
     Option(VersionScheme.EarlySemVer)
   )
@@ -248,7 +249,10 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
           )
         case _ =>
           pathref -> Seq(
-            TestInvocation.Targets(Seq("-d", "-j", "0", "pet-shop-full.verify"), noServer=false)
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-full.verify"),
+              noServer = false
+            )
           )
       }
     }
