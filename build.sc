@@ -52,7 +52,7 @@ trait Deps {
   def mainargs = ivy"com.lihaoyi::mainargs:0.5.4"
   def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
   def upickle = ivy"com.lihaoyi::upickle:3.1.0"
-  val `cats-core` = ivy"org.typelevel::cats-core:2.7.0"
+  val `cats-core` = ivy"org.typelevel::cats-core:2.10.0"
   val `guardrail-core` = ivy"dev.guardrail::guardrail-core:$guardrailVersion"
   val `mill-main-api` = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val `mill-scalalib` = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
