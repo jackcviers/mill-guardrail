@@ -50,7 +50,7 @@ trait Deps {
   def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.1.5"
   def `upickle-implicits` = ivy"com.lihaoyi::upickle-implicits:3.1.5"
   def mainargs = ivy"com.lihaoyi::mainargs:0.5.4"
-  def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.0"
+  def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.1"
   def upickle = ivy"com.lihaoyi::upickle:3.1.5"
   val `cats-core` = ivy"org.typelevel::cats-core:2.10.0"
   val `guardrail-core` = ivy"dev.guardrail::guardrail-core:$guardrailVersion"
