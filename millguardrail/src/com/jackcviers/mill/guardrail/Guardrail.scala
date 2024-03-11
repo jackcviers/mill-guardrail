@@ -168,7 +168,7 @@ object Guardrail {
     private case object `Pekko-Http` extends Framework {
       override def toString = "pekko-http"
     }
-    private case object `Spring-Mvc` extends Framework{
+    private case object `Spring-Mvc` extends Framework {
       override def toString = "spring-mvc"
     }
 
