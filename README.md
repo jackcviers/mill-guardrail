@@ -105,11 +105,14 @@ definitions.
 - [Scala Default No Server (Http4s/Circe)](itest/src/pet-shop-no-server.build.sc)
 - [Scala akka-http](itest/src/pet-shop-scala-akka-http.build.sc)
 - [Scala akka-http-jackson](itest/src/pet-shop-scala-akka-http-jackson.build.sc)
+- [Java dropwizard](itest/src/pet-shop-full-dropwizard.build.sc)
 
-### Limitations
+~~### Limitations~~
 
-Java code generation does not work, pending an answer to
-[guardrail/issues/1953](https://github.com/guardrail-dev/guardrail/issues/1953).
+~~Java code generation does not work, pending an answer to~~
+~~[guardrail/issues/1953](https://github.com/guardrail-dev/guardrail/issues/1953).~~
+
+Special thanks to @blast-hardcheese for helping with the configuration for Java dropwizard.
 
 
 ## Contributing
