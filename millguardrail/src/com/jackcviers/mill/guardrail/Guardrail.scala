@@ -137,6 +137,7 @@ trait Guardrail extends JavaModule with GuardrailPlatform {
     */
   def guardrailIvyDeps = T.task {
     Agg(
+      ivy"dev.guardrail:guardrail-java-async-http_2.13:1.0.0-M1",
       ivy"dev.guardrail:guardrail-java-dropwizard_2.13:1.0.0-M1",
       ivy"dev.guardrail:guardrail-java-spring-mvc_2.13:1.0.0-M1",
       ivy"dev.guardrail:guardrail-java-support_2.13:1.0.0-M1",

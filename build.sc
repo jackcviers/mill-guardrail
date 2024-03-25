@@ -13,14 +13,12 @@
  * limitations under the License.
  */
 
-// import $ivy.`io.github.davidgregory084::mill-tpolecat::0.0.0-68-5779b6`
-// import io.github.davidgregory084.TpolecatModule
+import $ivy.`io.github.davidgregory084::mill-tpolecat::0.3.5`
+import io.github.davidgregory084.TpolecatModule
 import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.1`
 import de.tobiasroeser.mill.integrationtest._
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
 import de.tobiasroeser.mill.vcs.version._
-// import $ivy.`io.github.kierendavies::mill-explicit-deps::0.2.0-57-207608-DIRTYb69d7b2d-SNAPSHOT`
-// import io.github.kierendavies.mill.explicitdeps.ExplicitDepsModule
 import $ivy.`com.github.lolgab::mill-mima::0.1.0`
 import com.github.lolgab.mill.mima._
 import $ivy.`com.lewisjkl::header-mill-plugin::0.0.3`
@@ -94,13 +92,11 @@ lazy val millItestVersions = crossDeps.flatMap(x => x.testWithMill.map(_ -> x))
 
 trait BaseModule
     extends ScalaModule
-    // with ExplicitDepsModule
     with Mima
     with PublishModule
     with HeaderModule
-    // with TpolecatModule
+    with TpolecatModule
     {
-  // def ignoreUnimportedIvyDeps: Task[Dep => Boolean] = T.task((_: Dep) => false)
 
   override def license: HeaderLicense =
     HeaderLicense.Apache2("2024", "Jack Viers")
@@ -232,6 +228,13 @@ trait ItestCross extends MillIntegrationTestModule with Cross.Module[String] {
             TestInvocation.Targets(
               Seq("-d", "-j", "0", "pet-shop-no-server.verify"),
               noServer = false
+            )
+          )
+        case "pet-shop-full-dropwizard" =>
+          pathref -> Seq(
+            TestInvocation.Targets(
+              Seq("-d", "-j", "0", "pet-shop-full-dropwizard"),
+              noServer = true
             )
           )
         case "pet-shop-scala-akka-http" =>
