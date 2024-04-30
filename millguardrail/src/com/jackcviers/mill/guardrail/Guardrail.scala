@@ -129,7 +129,7 @@ trait Guardrail extends JavaModule with GuardrailPlatform {
     Thread.currentThread().setContextClassLoader(classLoader)
     val result = worker.guardrailGenerate(guardrailTasks(), runner)
     Thread.currentThread().setContextClassLoader(currentClassLoader)
-    result
+    Seq(PathRef(T.dest))
   }
 
   /** Add the necessary support modules for any generated classes. NOTE - you
