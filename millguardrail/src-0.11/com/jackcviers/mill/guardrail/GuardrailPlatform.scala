@@ -22,7 +22,10 @@ import java.net.URLClassLoader
 
 trait GuardrailPlatform extends JavaModule { self: Guardrail =>
 
-  protected def guardrailWorkerRef = ModuleRef(GuardrailWorkerModule)
+  @deprecated("Performance: Use guardrailWorkerModule instead", "0.1.0-RC-7")
+  protected def guardrailWorkerRef = GuardrailWorkerModule
+
+  protected val guardrailWorkerModule = GuardrailWorkerModule
 
   private def guardrailClasspath: T[Seq[PathRef]] = T {
     resolveDeps(T.task {
@@ -32,7 +35,7 @@ trait GuardrailPlatform extends JavaModule { self: Guardrail =>
 
   protected def guardrailWorker
       : Task[(GuardrailWorker, GuardrailMillRunner, URLClassLoader)] = T.task {
-    guardrailWorkerRef()
+    guardrailWorkerModule
       .guardrailWorkerManager()
       .get(
         guardrailClasspath()

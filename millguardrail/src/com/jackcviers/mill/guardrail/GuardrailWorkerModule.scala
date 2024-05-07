@@ -19,6 +19,7 @@ import mill.T
 import mill.define._
 
 trait GuardrailWorkerModule extends Module {
+
   def guardrailWorkerManager: Worker[GuardrailWorkerManager] = T.worker {
     new GuardrailWorkerManagerImplementation()
   }
