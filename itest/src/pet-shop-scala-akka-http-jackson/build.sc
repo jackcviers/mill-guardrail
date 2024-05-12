@@ -70,8 +70,16 @@ object `pet-shop-scala-akka-http-jackson` extends ScalaModule with Guardrail {
 
   def verify(): Command[Unit] = T.command {
     compile()
-    println(allSources())
     val expectedSources = Set(
+      "pet-shop-full/guardrailGenerate.dest/guardrail",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/server",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/server/support",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/models",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/models/support",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/models/definitions",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/client",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/client/support",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/client/definitions",
       "pet-shop-scala-akka-http-jackson/guardrailGenerate.dest/guardrail/client/definitions/Address.scala",
       "pet-shop-scala-akka-http-jackson/guardrailGenerate.dest/guardrail/client/definitions/ApiResponse.scala",
       "pet-shop-scala-akka-http-jackson/guardrailGenerate.dest/guardrail/client/definitions/Category.scala",
@@ -116,8 +124,21 @@ object `pet-shop-scala-akka-http-jackson` extends ScalaModule with Guardrail {
       "pet-shop-scala-akka-http-jackson/guardrailGenerate.dest/guardrail/models/support/Presence.scala",
       "pet-shop-scala-akka-http-jackson/guardrailGenerate.dest/guardrail/models/support/EmptyIsNullDeserializers.scala"
     )
+    val generated = generatedSources().flatMap { entry =>
+      val withoutRefRegex = """^(?:[^:]+:){3}(.*)$""".r
+      val justPetShopFullRegex = """^.*/(pet-shop-full/.*)$""".r
+      val withoutRef = withoutRefRegex.replaceAllIn(
+        entry.toString.replaceAllLiterally("\\", "/"),
+        "$1"
+      )
+      os.walk(os.Path(withoutRef))
+        .map(f =>
+          justPetShopFullRegex
+            .replaceAllIn(f.toString().replaceAllLiterally("\\", "/"), "$1")
+        )
+    }
     assert(
-      generatedSources().exists(f =>
+      generated.exists(f =>
         expectedSources.exists(e =>
           f.toString.replaceAllLiterally("\\", "/").contains(e.toString)
         )
