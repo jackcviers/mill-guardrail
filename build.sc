@@ -41,7 +41,7 @@ trait Deps {
   def scalaVersion: String = "2.13.13"
   def testWithMill: Seq[String]
 
-  def mimaPreviousVersions: Seq[String] = Seq()
+  def mimaPreviousVersions: Seq[String] = Seq("0.0.1-RC-5", "0.0.1-RC-6")
 
   private val guardrailVersion = "1.0.0-M1"
 
