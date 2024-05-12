@@ -55,35 +55,54 @@ object `pet-shop-no-server` extends ScalaModule with Guardrail {
 
   def verify(): Command[Unit] = T.command {
     compile()
-    println(allSources())
     val expectedSources = Set(
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Order.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/User.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/ApiResponse.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/User.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/package.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/ApiResponse.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/support/Presence.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Order.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Pet.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Tag.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/package.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/Client.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/support/Presence.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Category.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Customer.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Tag.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Category.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Pet.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Address.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/Implicits.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/Implicits.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/Http4sImplicits.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Address.scala",
-      s"pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Customer.scala"
+      "pet-shop-full/guardrailGenerate.dest/guardrail",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/models",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/models/support",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/models/definitions",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/client",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/client/support",
+      "pet-shop-full/guardrailGenerate.dest/guardrail/client/definitions",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Order.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/User.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/ApiResponse.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/User.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/package.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/ApiResponse.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/support/Presence.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Order.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Pet.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Tag.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/package.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/Client.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/support/Presence.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Category.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Customer.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Tag.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Category.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Pet.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Address.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/Implicits.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/Implicits.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/Http4sImplicits.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/models/definitions/Address.scala",
+      "pet-shop-no-server/out/pet-shop-no-server/guardrailGenerate.dest/guardrail/client/definitions/Customer.scala"
     )
+    val generated = generatedSources().flatMap { entry =>
+      val withoutRefRegex = """^(?:[^:]+:){3}(.*)$""".r
+      val justPetShopFullRegex = """^.*/(pet-shop-full/.*)$""".r
+      val withoutRef = withoutRefRegex.replaceAllIn(
+        entry.toString.replaceAllLiterally("\\", "/"),
+        "$1"
+      )
+      os.walk(os.Path(withoutRef))
+        .map(f =>
+          justPetShopFullRegex
+            .replaceAllIn(f.toString().replaceAllLiterally("\\", "/"), "$1")
+        )
+    }
     assert(
-      generatedSources().exists(f =>
+      generated.exists(f =>
         expectedSources.exists(e =>
           f.toString.replaceAllLiterally("\\", "/").contains(e.toString)
         )

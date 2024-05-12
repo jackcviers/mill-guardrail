@@ -25,17 +25,20 @@ class GuardrailWorkerManagerImplementation()
     extends GuardrailWorkerManager
     with AutoCloseable {
 
-  private val cache: TrieMap[Seq[
-    PathRef
-  ], (GuardrailWorker, GuardrailMillRunner, WorkerCount, URLClassLoader)] =
+  private val cache: TrieMap[
+    Int,
+    (GuardrailWorker, GuardrailMillRunner, WorkerCount, URLClassLoader)
+  ] =
     TrieMap.empty
 
   def get(toolsClasspath: Seq[PathRef])(implicit
       ctx: Ctx
   ): (GuardrailWorker, GuardrailMillRunner, URLClassLoader) = {
+    dev.guardrail.Target.loggerEnabled.set(false)
     val distinctClasspath = toolsClasspath.distinct
+    val classpathHashCode = toolsClasspath.hashCode()
     val (worker, runner, count, classLoader) = cache.getOrElseUpdate(
-      distinctClasspath, {
+      classpathHashCode, {
         val classLoader = new URLClassLoader(
           distinctClasspath.map(_.path.toNIO.toUri().toURL()).toArray[URL],
           getClass().getClassLoader()
@@ -55,7 +58,7 @@ class GuardrailWorkerManagerImplementation()
       }
     )
     cache.replace(
-      distinctClasspath,
+      classpathHashCode,
       (worker, runner, WorkerCount(count.value + 1), classLoader)
     )
     (worker, runner, classLoader)
