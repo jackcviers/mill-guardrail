@@ -57,7 +57,7 @@ trait Deps {
   val `mill-main-api` = ivy"com.lihaoyi::mill-main-api:${millVersion}"
   val `mill-scalalib` = ivy"com.lihaoyi::mill-scalalib:${millVersion}"
   val millTestkit = ivy"com.lihaoyi::mill-main-testkit:${millVersion}"
-  val munit = ivy"org.scalameta::munit::0.7.29"
+  val munit = ivy"org.scalameta::munit::1.0.0"
   val millMain = ivy"com.lihaoyi::mill-main:${millVersion}"
 }
 
