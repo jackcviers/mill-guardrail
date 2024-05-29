@@ -64,7 +64,7 @@ object `pet-shop-scala-akka-http` extends ScalaModule with Guardrail {
       ivy"eu.timepit::refined-cats:$refinedVersion",
       ivy"javax.annotation:javax.annotation-api:1.3.2",
       ivy"javax.xml.bind:jaxb-api:2.3.1",
-      ivy"org.typelevel::cats-core:2.10.0"
+      ivy"org.typelevel::cats-core:2.12.0"
     )
   }
 
