@@ -49,7 +49,7 @@ trait Deps {
   def `os-lib` = ivy"com.lihaoyi::os-lib:0.10.2"
   def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.2.0"
   def `upickle-implicits` = ivy"com.lihaoyi::upickle-implicits:3.2.0"
-  def mainargs = ivy"com.lihaoyi::mainargs:0.6.3"
+  def mainargs = ivy"com.lihaoyi::mainargs:0.7.1"
   def sourcecode = ivy"com.lihaoyi::sourcecode:0.3.1"
   def upickle = ivy"com.lihaoyi::upickle:3.2.0"
   val `cats-core` = ivy"org.typelevel::cats-core:2.10.0"
