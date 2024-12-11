@@ -17,7 +17,7 @@
 // import io.github.davidgregory084.TpolecatModule
 import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.1`
 import de.tobiasroeser.mill.integrationtest._
-import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
+import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.1`
 import de.tobiasroeser.mill.vcs.version._
 // import $ivy.`io.github.kierendavies::mill-explicit-deps::0.2.0-57-207608-DIRTYb69d7b2d-SNAPSHOT`
 // import io.github.kierendavies.mill.explicitdeps.ExplicitDepsModule
