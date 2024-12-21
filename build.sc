@@ -23,7 +23,7 @@ import de.tobiasroeser.mill.vcs.version._
 // import io.github.kierendavies.mill.explicitdeps.ExplicitDepsModule
 import $ivy.`com.github.lolgab::mill-mima::0.1.1`
 import com.github.lolgab.mill.mima._
-import $ivy.`com.lewisjkl::header-mill-plugin::0.0.3`
+import $ivy.`com.lewisjkl::header-mill-plugin::0.0.4`
 import header._
 import mill._
 import mill.scalalib._
