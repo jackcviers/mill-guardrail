@@ -15,7 +15,7 @@
 
 // import $ivy.`io.github.davidgregory084::mill-tpolecat::0.0.0-68-5779b6`
 // import io.github.davidgregory084.TpolecatModule
-import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.1`
+import $ivy.`de.tototec::de.tobiasroeser.mill.integrationtest::0.7.3`
 import de.tobiasroeser.mill.integrationtest._
 import $ivy.`de.tototec::de.tobiasroeser.mill.vcs.version::0.4.0`
 import de.tobiasroeser.mill.vcs.version._
