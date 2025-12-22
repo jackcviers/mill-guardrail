@@ -45,7 +45,7 @@ trait Deps {
 
   private val guardrailVersion = "1.0.0-M1"
 
-  def `mill-moduledefs` = ivy"com.lihaoyi::mill-moduledefs:0.10.9"
+  def `mill-moduledefs` = ivy"com.lihaoyi::mill-moduledefs:0.12.5"
   def `os-lib` = ivy"com.lihaoyi::os-lib:0.10.2"
   def `upickle-core` = ivy"com.lihaoyi::upickle-core:3.2.0"
   def `upickle-implicits` = ivy"com.lihaoyi::upickle-implicits:3.2.0"
